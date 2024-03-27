@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{%block style %}
+    <link rel="stylesheet" href="{%static 'style.css'%}">
+{% endblock %}
+{%block header%}
+ Тут будет хедер
+{%endblock%}
+{% block content %}
+<span>Already has account? <a href="{% url 'login' %}">Login</a></span>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Register">
+</form>
+{% endblock %}

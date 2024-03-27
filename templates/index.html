@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{%block style %}
+    <link rel="stylesheet" href="{%static 'style.css'%}">
+{% endblock %}
+{%block header%}
+ Тут будет хедер
+{%endblock%}
+
+
+{% block content %}
+Тут будет контент
+<div>
+    <a href="{% url 'logout' %}">Logout</a>
+    <a href="{% url 'register' %}">Sign Up</a>
+    <a href="{% url 'login' %}">login</a>
+</div>
+
+{{request.user}}
+
+ {% if request.user.is_authenticated %}
+    <a href="{% url 'logout' %}">Logout</a> {% else %}
+    <a href="{% url 'login' %}">Login</a> {% endif %}
+
+{% endblock %}
