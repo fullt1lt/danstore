@@ -10,8 +10,7 @@
 
 
 {% block content %}
-Форма для входа или регистрации
-<span>Wanna register? <a href="{% url 'register' %}">Sign Up</a></span>
+<span><a href="{% url 'register' %}">Sign Up</a></span>
 <form method="post">
     {% csrf_token %}
     {{ form }}

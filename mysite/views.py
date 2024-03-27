@@ -1,20 +1,18 @@
 from django.shortcuts import render
 from django.views import View
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LoginView
 from django.views.generic import ListView, CreateView
+from danstore.forms import RegisterUserForm
 
 class Login(LoginView):
     next_page = '/'
     template_name = 'login.html'
+    redirect_authenticated_user = True
     
-# class Logout(LogoutView):
-#     next_page = '/'
-#     login_url = 'login/' 
-    
+
 class Register(CreateView):
-    form_class = UserCreationForm
+    form_class = RegisterUserForm
     template_name = 'register.html'
     success_url = '/'
 

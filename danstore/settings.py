@@ -78,8 +78,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'dandbstore',
-        'USER': 'danstoreuser',
-        'PASSWORD': 'storepass',
+        'USER': 'danuser',
+        'PASSWORD': 'danpass',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -128,3 +128,5 @@ STATICFILES_DIRS = ['static']
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'mysite.StoreUser' 
