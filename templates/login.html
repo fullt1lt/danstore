@@ -10,10 +10,19 @@
 
 
 {% block content %}
-<span><a href="{% url 'register' %}">Sign Up</a></span>
-<form method="post">
-    {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Login">
-</form>
+<ul class="login_list">
+    <Li>
+        <h1>Login</h1>
+    </Li>
+    <li>
+        <form method="post" class="login_form">
+            {% csrf_token %}
+            {{ form }}
+            <input type="submit" value="Login" class="login_input">
+    </form>
+    </li>
+    <li>
+        <span>Don't have an account?<a href="{% url 'register' %}">Register</a></span>
+    </li>
+</ul>
 {% endblock %}

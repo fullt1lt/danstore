@@ -8,8 +8,19 @@
 </head>
 <body>
 <header>
-    {%block header%}
-    {%endblock%}
+    <ul class="header_list">
+            <li><a href="{% url 'index' %}">Home</a></li>
+    <li><a href="{% url 'product' %}">Product</a></li>
+    {% if request.user.is_authenticated %}
+        <li class="authorization"> {{request.user.username}} | 
+        <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+            <button type="submit" class="button_logout">Logout</button>
+        </form></li>
+        {% else %}
+        <li class="authorization"><a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Sign Up</a></li>
+        {% endif %}
+    </ul>
 </header>
     {% block content %}
     {% endblock %}

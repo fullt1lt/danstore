@@ -8,11 +8,19 @@
  Тут будет хедер
 {%endblock%}
 {% block content %}
-<span>Already has account? <a href="{% url 'login' %}">Login</a></span>
-
-<form method="post">
-    {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Register">
-</form>
+<ul class="registration_list">
+    <Li>
+        <h1>Create Account</h1>
+    </Li>
+    <li>
+        <span>Already has account? <a href="{% url 'login' %}">Login</a></span>
+    </li>
+    <li>
+        <form method="post" class="registration_form">
+            {% csrf_token %}
+            {{ form }}
+            <input type="submit" value="Register" class="register_input">
+        </form>
+    </li>
+</ul>
 {% endblock %}
