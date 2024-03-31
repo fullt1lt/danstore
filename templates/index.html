@@ -10,8 +10,19 @@
 
 
 {% block content %}
-Тут будет контент
-<br>
-User name - {{request.user}}
-<br>
+<ul class = "product_list">
+    {% for item in object_list %}
+        <li>
+            <ul>
+                <li>
+                    <img src="../static/logo.svg" alt="" class="logo">
+                </li>
+                <li>{{item.name}}</li>
+                <li>{{item.description}}</li>
+                <li>{{item.price}}</li>
+                <li>{{item.quantity_available}}</li>
+            </ul>
+        </li>
+    {% endfor %}
+</ul>
 {% endblock %}

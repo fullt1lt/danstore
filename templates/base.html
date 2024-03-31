@@ -8,23 +8,62 @@
 </head>
 <body>
 <header>
-    <ul class="header_list">
-            <li><a href="{% url 'index' %}">Home</a></li>
-    <li><a href="{% url 'product' %}">Product</a></li>
-    {% if request.user.is_authenticated %}
-        <li class="authorization"> {{request.user.username}} | 
-        <form method="post" action="{% url 'logout' %}">
-                {% csrf_token %}
-            <button type="submit" class="button_logout">Logout</button>
-        </form></li>
-        {% else %}
-        <li class="authorization"><a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Sign Up</a></li>
-        {% endif %}
+    <ul class="Header_list">
+        <li class="Header-logo">
+            <img src="../static/logo.svg" alt="" class="logo">
+        </li>
+        <li>
+            <ul class="Menu_list">
+                <li><a href="{% url 'index' %}">Home</a></li>
+                <li><a href="{% url 'product' %}">Product</a></li>
+                <li><a href="{% url 'about' %}">About Us</a></li>
+            </ul>
+        </li>
+        <li>
+            <ul class="authorization_list">
+                {% if request.user.is_authenticated %}
+                    <li class="authorization"> {{request.user.username}} | 
+                        <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="button_logout">Logout</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li class="authorization"><a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </li>
     </ul>
 </header>
+<section class="Block_content">
     {% block content %}
     {% endblock %}
+</section>
+<section>
     {% block login %}
     {% endblock %}
+</section>
+<footer>
+    <ul class="Footer_list">
+        <li class="Header-logo">
+            <img src="../static/logo.svg" alt="" class="logo">
+        </li>
+        <li>
+            <ul class="Menu_list">
+                <li><a href="{% url 'index' %}">Home</a></li>
+                <li><a href="{% url 'product' %}">Product</a></li>
+                <li><a href="{% url 'about' %}">About Us</a></li>
+            </ul>
+        </li>
+    </ul>
+    <ul class="FooterEnd_List">
+        <li>
+            <span>© 2024 All Rights Reserved | DanStore</span>
+        </li>
+        <li>
+            <span>Company Site   |   Privacy Policy</span>
+        </li>
+    </ul>
+</footer>
 </body>
 </html>
