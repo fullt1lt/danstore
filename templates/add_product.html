@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{%block style %}
+    <link rel="stylesheet" href="{%static 'style.css'%}">
+{% endblock %}
+
+{% block content %}
+<ul class="create_product_list">
+    <li>
+        <h1>Create Product</h1>
+    </li>
+    <li>
+        <form method="post" enctype="multipart/form-data" class="create_product_form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="add_product">Add Product</button>
+    </form>
+    </li>
+</ul>
+{% endblock %}

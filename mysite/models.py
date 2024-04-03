@@ -11,6 +11,10 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     quantity_available = models.PositiveIntegerField()
+    image = models.ImageField(blank=True, upload_to="images/")
+    
+    def __str__(self) -> str:
+        return self.name
 
 class Purchase(models.Model):
     user = models.ForeignKey(StoreUser, on_delete=models.CASCADE)

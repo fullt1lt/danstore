@@ -6,19 +6,16 @@
 {% endblock %}
 
 {% block content %}
-<ul class="login_list">
+<ul class="update_list">
     <Li>
         <h1>Login</h1>
     </Li>
     <li>
-        <form method="post" class="login_form">
+        <form method="post" enctype="multipart/form-data" class="update_form">
             {% csrf_token %}
             {{ form }}
-            <input type="submit" value="Login" class="login_input">
+            <input type="submit" value="Update" class="update_input">
     </form>
-    </li>
-    <li>
-        <span>Don't have an account?<a href="{% url 'register' %}">Register</a></span>
     </li>
 </ul>
 {% endblock %}

@@ -6,6 +6,9 @@
 {% endblock %}
 
 {% block content %}
+<div class="Add_product">
+    <a href="{% url 'add_product' %}" class="link_create_product">Add Product</a>
+</div>
 <ul class = "product_list">
     {% for item in page_obj %}
         <li class="product_item">
@@ -21,9 +24,16 @@
                 <li class="item_price"> Price: {{item.price}} Kč</li>
                 <li class="item_quantity_available">
                     <span>In stock - {{item.quantity_available}} pcs</span>
-                    
                 </li>
                 <li class="item_description"><span class="span_description">{{item.description}}</span></li>
+                <li class="update_and_delete">
+                    <a href="{% url 'product_update' item.pk %}" class="link_update">Update</a>
+                    <form method="post" action="{% url 'product_delete' item.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete_id" value="{{ item.pk }}">
+                        <input type="submit" value="Delete" class="delete_product">
+                    </form>
+                </li>
             </ul>
         </li>
     {% endfor %}
@@ -45,3 +55,4 @@
     </span>
     </div>
 {% endblock %}
+
