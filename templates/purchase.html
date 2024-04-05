@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{%block style %}
+    <link rel="stylesheet" href="{%static 'style.css'%}">
+{% endblock %}
+
+{% block content %}
+<ul class="purchase_list">
+    {% for purchase_item in purchase_items %}
+        <li class="purchase_item">
+            <h1>{{ purchase_item.product.name }}</h1>
+            <ul class="purchase_item__list">
+                <li class="purchase_item_image">
+                    {% if purchase_item.product.image %}
+                        <img src="{{ purchase_item.product.image.url }}" alt="Product Image" class="purchase_product_image">
+                    {% else %}
+                        No image available<br>
+                    {% endif %}
+                </li>
+                <li class="purchase_item_content">
+                    <ul class="purchase_content__list">
+                        <li class="purchase_content_description">
+                            {{ purchase_item.product.description }}
+                        </li>
+                        <li class="purchase_content_price">
+                            <span>{{purchase_item.quantity}} x {{ purchase_item.product.price }} = {{ purchase_item.total_price}}</span>
+                        </li>
+                        {% if messages %}
+                            {% for message in messages %}
+                                {% if message.extra_tags == purchase_item.id|stringformat:"s" %}
+                                    <li class="message">
+                                        {{ message }}
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        <li class="purchase_buy_delete">
+                            <form action="{% url 'remove_from_purchase' purchase_item.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="delete_button">Delete</button>
+                            </form>
+                            <form action="{% url 'complete_purchase' purchase_item.product.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="buy_button">Buy</button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    {% endfor %}
+    {{purchase_items.count}}
+</ul>
+{% endblock %}

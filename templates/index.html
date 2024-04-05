@@ -21,8 +21,20 @@
                 <li class="item_price"> Price: {{item.price}} Kč</li>
                 <li class="item_quantity_available">
                     <span>In stock - {{item.quantity_available}} pcs</span>
-                    
+                    <form action="{% url 'add_to_purchase' item.id %}" method="GET" class="add_to_purchase">
+                        <input type="number" name="quantity" value="1" min="1" class="quantity_product">
+                        <button type="submit" class="button_basket"><img src="../static/basket.svg" alt=""></button>
+                    </form>
                 </li>
+                {% if messages %}
+                    {% for message in messages %}
+                            {% if message.extra_tags == item.id|stringformat:"s" %}
+                                <li class="message">
+                                    {{ message }}
+                                </li>
+                            {% endif %}
+                    {% endfor %}
+                {% endif %}
                 <li class="item_description"><span class="span_description">{{item.description}}</span></li>
             </ul>
         </li>

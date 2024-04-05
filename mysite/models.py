@@ -21,7 +21,16 @@ class Purchase(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     purchase_time = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self) -> str:
+        return f"{self.user.username} - {self.product.name}" 
 
 class Return(models.Model):
     purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
     request_time = models.DateTimeField(auto_now_add=True)
+    
+    
+class PurchaseHistory(models.Model):
+    user = models.ForeignKey(StoreUser, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
