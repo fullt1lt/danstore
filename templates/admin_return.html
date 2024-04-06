@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{%block style %}
+    <link rel="stylesheet" href="{%static 'style.css'%}">
+{% endblock %}
+
+{% block content %}
+<ul class="purchase_list">
+    {% if admin_return_items.count == 0 %}
+         <img src="../static/empty_return_list.png" alt="noorders" class="noorders">
+        <li>Return list is empty</li>
+    {%else%}
+    {% for return_item in admin_return_items %}
+        <li class="purchase_item">
+            <h1>User - {{ return_item.purchase.user }}</h1>
+            <ul class="purchase_item__list">
+                <li class="purchase_item_image">
+                    {% if return_item.purchase.product.image %}
+                        <img src="{{ return_item.purchase.product.image.url }}" alt="Product Image" class="purchase_product_image">
+                    {% else %}
+                        No image available<br>
+                    {% endif %}
+                </li>
+                <li class="purchase_item_content">
+                    <ul class="purchase_content__list">
+                        <li class="purchase_content_description">
+                            <h4>{{ return_item.purchase.product.name }}</h4>
+                            {{ return_item.purchase.product.description }}
+                        </li>
+                        <li class="purchase_content_price">
+                            <span>{{return_item.purchase.quantity}} x {{ return_item.purchase.product.price }} = {{ return_item.purchase.price_purchase}}</span>
+                        </li>
+                        <li class="purchase_history_list">
+                            <form action="{% url 'delete_return' return_item.pk %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="delete_button">Delete</button>
+                            </form>
+                            <form action="{% url 'confirm_return' return_item.id return_item.purchase.product.id return_item.purchase.user.id%}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="confirm_return_button">Confirm</button>
+                            </form>
+                        </li>
+                        {% if messages %}
+                            {% for message in messages %}
+                                {% if message.extra_tags == history_item.id|stringformat:"s" %}
+                                    <span class="message">
+                                        {{ message }}
+                                    </span>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    {% endfor %}
+{% endif %}
+</ul>
+{% endblock %}

@@ -9,7 +9,7 @@
 <ul class="purchase_list">
 {% if purchase_history_items.count == 0 %}
          <img src="../static/noorders.png" alt="noorders" class="noorders">
-        <li>Shopping cart is empty</li>
+        <li>Purchase list is empty</li>
     {% else %}
         {% for history_item in purchase_history_items %}
             <li class="purchase_item">
@@ -30,6 +30,21 @@
                             <li class="purchase_content_price">
                                 <span>{{history_item.quantity}} x {{ history_item.product.price }} = {{ history_item.price_purchase}}</span>
                             </li>
+                            <li class="purchase_history_list">
+                                <form action="{% url 'add_to_purchase_history' history_item.id %}" method="post" class="add_to_purchase_history">
+                                    {% csrf_token %}
+                                    <button type="submit" class="return_order">Return order</button>
+                                </form>
+                            </li>
+                            {% if messages %}
+                                {% for message in messages %}
+                                    {% if message.extra_tags == history_item.id|stringformat:"s" %}
+                                        <span class="message">
+                                            {{ message }}
+                                        </span>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
                         </ul>
                     </li>
                 </ul>

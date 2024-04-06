@@ -10,8 +10,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.views.generic import ListView, FormView, DeleteView, UpdateView, TemplateView
 from forms.forms import LoginUserForm, ProductForm, RegisterUserForm
-from mysite.models import Product, Purchase, PurchaseHistory
+from mysite.models import Product, Purchase, PurchaseHistory, Return, StoreUser
 from django.db.models import Sum
+from django.utils import timezone
+from datetime import timedelta
 
 
 class HomePageView(LoginRequiredMixin, ListView):
@@ -196,7 +198,65 @@ class CheckoutView(LoginRequiredMixin, View):
 class PurchaseHistoryView(LoginRequiredMixin, ListView):
     model = PurchaseHistory
     template_name = "purchase_history.html"
-    context_object_name = "purchase_history_items"  # Имя переменной контекста для списка объектов
+    context_object_name = "purchase_history_items"
 
     def get_queryset(self):
         return PurchaseHistory.objects.filter(user=self.request.user)
+    
+class AddToPPurchaseHistoryView(View):
+    
+    def post(self, request, history_item_id):
+        messages.error(request, self.check_order(history_item_id), extra_tags=str(history_item_id))
+        return redirect('purchase_history')
+        
+    def add_return_order(self, history_item):
+        Return.objects.create(purchase=history_item)
+        
+    def check_order(self, history_item_id):
+        history_item = PurchaseHistory.objects.get(id=history_item_id)
+        message = self.check_order_exists(history_item)
+        if message == None:
+            return self.check_order_time(history_item)
+        else:
+            return message
+        
+    def check_order_exists(self, history_item):
+        if Return.objects.filter(purchase=history_item).exists():
+            return 'Return purchase already exists.'
+        else:
+            return None
+        
+    def check_order_time(self, history_item):
+        if timezone.now() - history_item.purchase_history_time < timedelta(minutes=3):
+            self.add_return_order(history_item)
+            return 'Return purchase submitted.'
+        else:
+            return 'Time to return has expired.'
+
+@method_decorator(staff_member_required, name='dispatch')
+class AdminReturnView(ListView):
+    model = Return
+    template_name = "admin_return.html"
+    context_object_name = "admin_return_items"
+
+    def get_queryset(self):
+        return Return.objects.all()
+
+    
+class DeleteReturnView(LoginRequiredMixin, DeleteView):
+    model = Return
+    success_url = '/admin_return/'
+
+
+class ConfirmReturnView(LoginRequiredMixin, View):
+    
+    def post(self, request, item_id, product_id, user_id):
+        product = get_object_or_404(Product, id=product_id)
+        ret = Return.objects.filter(id=item_id).first()
+        user = StoreUser.objects.filter(id=user_id).first()
+        user.wallet += ret.purchase.price_purchase
+        product.quantity_available +=ret.purchase.quantity
+        user.save()
+        product.save()
+        ret.delete()
+        return redirect('admin_return')
