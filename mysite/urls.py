@@ -1,6 +1,7 @@
 from django.urls import path
-from mysite.views import AboutPage, AddToPurchaseView, AdminPageView, CreateProductView, CheckoutView, HomePage, Login, ProductDeleteView, ProductPage, ProductUpdateView, Register, RemoveFromPurchaseView, ViewPurchaseView
 from django.contrib.auth.views import LogoutView
+from mysite.views import (AboutPage, AddToPurchaseView, AdminPageView, CreateProductView, CheckoutView, HomePage, Login, 
+                          ProductDeleteView, ProductPage, ProductUpdateView, Register, RemoveFromPurchaseView, ViewPurchaseView, PurchaseHistoryView)
 
 urlpatterns = [
     path('', HomePage.as_view(), name='index'),
@@ -16,5 +17,6 @@ urlpatterns = [
     path('add_to_purchase/<int:product_id>/', AddToPurchaseView.as_view(), name='add_to_purchase'),
     path('remove_from_purchase/<int:purchase_item_id>/', RemoveFromPurchaseView.as_view(), name='remove_from_purchase'),
     path('purchase/', ViewPurchaseView.as_view(), name='purchase'),
-     path('complete_purchase/<int:product_id>/', CheckoutView.as_view(), name='complete_purchase'),
+    path('complete_purchase/<int:product_id>/', CheckoutView.as_view(), name='complete_purchase'),
+    path('purchase_history/', PurchaseHistoryView.as_view(), name='purchase_history'),
 ]

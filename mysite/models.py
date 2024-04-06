@@ -33,4 +33,8 @@ class Return(models.Model):
 class PurchaseHistory(models.Model):
     user = models.ForeignKey(StoreUser, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
+    quantity = models.PositiveIntegerField(blank=True, null=True)
+    price_purchase = models.PositiveIntegerField(blank=True, null=True)
+    
+    def __str__(self) -> str:
+        return f"{self.user.username} - {self.product.name} - {self.quantity}" 

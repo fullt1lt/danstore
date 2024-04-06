@@ -115,7 +115,7 @@ class ProductUpdateView(UpdateView):
     def get_success_url(self):
         return reverse_lazy('admin_page')
 
-    
+
 class AddToPurchaseView(LoginRequiredMixin,View):
     login_url = reverse_lazy('login')
     
@@ -150,7 +150,7 @@ class AddToPurchaseView(LoginRequiredMixin,View):
                     purchase_item.save()
                 return None
         else:
-            return 'Недостаточно товара на складе.'
+            return 'There are not enough products in stock.'
         
     
 
@@ -159,9 +159,9 @@ class RemoveFromPurchaseView(LoginRequiredMixin, View):
         try:
             purchase_item = Purchase.objects.get(id=purchase_item_id)
             purchase_item.delete()
-            messages.success(request, 'Товар успешно удален из корзины.')
+            messages.success(request, 'The product has been successfully removed from the cart.')
         except Purchase.DoesNotExist:
-            messages.error(request, 'Товар не найден в корзине.')
+            messages.error(request, 'Product not found in cart.')
         
         return redirect('purchase')
 
@@ -182,16 +182,21 @@ class CheckoutView(LoginRequiredMixin, View):
             for item in purchase_items:
                 price_purchase = +(item.quantity*product.price)
                 if price_purchase <= request.user.wallet:
-                    new_purchase = PurchaseHistory.objects.create(user=request.user, product=product ,quantity=item.quantity)
+                    PurchaseHistory.objects.create(user=request.user, product=product ,quantity=item.quantity, price_purchase=price_purchase)
                     item.product.quantity_available -= item.quantity
-                    request.user.wallet -= product.price
+                    request.user.wallet -= price_purchase
                     item.product.save()
                     request.user.save() 
                     purchase_items.delete()
                 else:
-                    error_message = 'Покупка невозможна'
+                    error_message = 'Purchase is not possible'
                     messages.error(request, error_message, extra_tags=str(product.id))
-
-
         return redirect('purchase')
     
+class PurchaseHistoryView(LoginRequiredMixin, ListView):
+    model = PurchaseHistory
+    template_name = "purchase_history.html"
+    context_object_name = "purchase_history_items"  # Имя переменной контекста для списка объектов
+
+    def get_queryset(self):
+        return PurchaseHistory.objects.filter(user=self.request.user)

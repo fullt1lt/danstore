@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{%block style %}
+    <link rel="stylesheet" href="{%static 'style.css'%}">
+{% endblock %}
+
+{% block content %}
+<ul class="purchase_list">
+{% if purchase_history_items.count == 0 %}
+         <img src="../static/noorders.png" alt="noorders" class="noorders">
+        <li>Shopping cart is empty</li>
+    {% else %}
+        {% for history_item in purchase_history_items %}
+            <li class="purchase_item">
+                <h1>{{ history_item.product.name }}</h1>
+                <ul class="purchase_item__list">
+                    <li class="purchase_item_image">
+                        {% if history_item.product.image %}
+                            <img src="{{ history_item.product.image.url }}" alt="Product Image" class="purchase_product_image">
+                        {% else %}
+                            No image available<br>
+                        {% endif %}
+                    </li>
+                    <li class="purchase_item_content">
+                        <ul class="purchase_content__list">
+                            <li class="purchase_content_description">
+                                {{ history_item.product.description }}
+                            </li>
+                            <li class="purchase_content_price">
+                                <span>{{history_item.quantity}} x {{ history_item.product.price }} = {{ history_item.price_purchase}}</span>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        {% endfor %}
+    {% endif %}
+</ul>
+{% endblock %}
