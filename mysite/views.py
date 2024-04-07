@@ -2,8 +2,8 @@ from django.contrib import messages
 from django.db import transaction
 from django.utils.decorators import method_decorator
 from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import redirect, render, get_object_or_404
-from django.urls import reverse, reverse_lazy
+from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
 from django.views import View
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -11,7 +11,6 @@ from django.contrib.auth.views import LoginView
 from django.views.generic import ListView, FormView, DeleteView, UpdateView, TemplateView
 from forms.forms import LoginUserForm, ProductForm, RegisterUserForm
 from mysite.models import Product, Purchase, PurchaseHistory, Return, StoreUser
-from django.db.models import Sum
 from django.utils import timezone
 from datetime import timedelta
 
@@ -124,22 +123,28 @@ class AddToPurchaseView(LoginRequiredMixin,View):
     def get(self, request, product_id):
         user = request.user
         quantity = self.preparation_quntity(request)
-        product = get_object_or_404(Product, id=product_id)
-        purchase_quantity = Purchase.objects.filter(user=user, product=product).aggregate(total_quantity=Sum('quantity'))['total_quantity']
+        product = Product.objects.filter(id=product_id).first()
+        purchase = Purchase.objects.filter(user=user, product=product).first()
+        purchase_quantity = self.preparation_purchase_quntity(purchase)
         error_message = self.add_to_purchase(user, quantity, product, purchase_quantity)
         messages.error(request, error_message, extra_tags=str(product.id))
         return redirect('index')
     
+    def preparation_purchase_quntity(self, purchase):
+        if purchase is None:
+            return 0
+        else:
+            return purchase.quantity
+            
+            
     def preparation_quntity(self,request):
-        quantity_str = request.GET.get('quantity', '1')
+        quantity = request.GET.get('quantity', '1')
         try:
-            return max(int(quantity_str), 1)
+            return max(int(quantity), 1)
         except ValueError:
             return 1
         
     def add_to_purchase(self,user, quantity, product, purchase_quantity):
-        if purchase_quantity is None:
-            purchase_quantity = 0
         if product.quantity_available >= quantity and product.quantity_available >= quantity + purchase_quantity:
             with transaction.atomic():
                 purchase_item, created = Purchase.objects.get_or_create(
@@ -155,7 +160,6 @@ class AddToPurchaseView(LoginRequiredMixin,View):
             return 'There are not enough products in stock.'
         
     
-
 class RemoveFromPurchaseView(LoginRequiredMixin, View):
     def post(self, request, purchase_item_id):
         try:
@@ -178,23 +182,23 @@ class ViewPurchaseView(LoginRequiredMixin, ListView):
 class CheckoutView(LoginRequiredMixin, View):
     def post(self, request, product_id):
         price_purchase = 0
-        purchase_items = Purchase.objects.filter(user=request.user)
-        product = get_object_or_404(Product, id=product_id)
+        purchase = Purchase.objects.filter(user=request.user).first()
+        product = Product.objects.filter(id=product_id).first()
         with transaction.atomic():
-            for item in purchase_items:
-                price_purchase = +(item.quantity*product.price)
-                if price_purchase <= request.user.wallet:
-                    PurchaseHistory.objects.create(user=request.user, product=product ,quantity=item.quantity, price_purchase=price_purchase)
-                    item.product.quantity_available -= item.quantity
-                    request.user.wallet -= price_purchase
-                    item.product.save()
-                    request.user.save() 
-                    purchase_items.delete()
-                else:
-                    error_message = 'Purchase is not possible'
-                    messages.error(request, error_message, extra_tags=str(product.id))
+            price_purchase +=(purchase.quantity * product.price)
+            if price_purchase <= request.user.wallet:
+                PurchaseHistory.objects.create(user=request.user, product=product ,quantity=purchase.quantity, price_purchase=price_purchase)
+                purchase.product.quantity_available -= purchase.quantity
+                request.user.wallet -= price_purchase
+                purchase.product.save()
+                request.user.save() 
+                purchase.delete()
+            else:
+                error_message = 'Purchase is not possible'
+                messages.error(request, error_message, extra_tags=str(product.id))
         return redirect('purchase')
-    
+
+
 class PurchaseHistoryView(LoginRequiredMixin, ListView):
     model = PurchaseHistory
     template_name = "purchase_history.html"
@@ -203,6 +207,7 @@ class PurchaseHistoryView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return PurchaseHistory.objects.filter(user=self.request.user)
     
+
 class AddToPPurchaseHistoryView(View):
     
     def post(self, request, history_item_id):
@@ -233,6 +238,7 @@ class AddToPPurchaseHistoryView(View):
         else:
             return 'Time to return has expired.'
 
+
 @method_decorator(staff_member_required, name='dispatch')
 class AdminReturnView(ListView):
     model = Return
@@ -251,12 +257,19 @@ class DeleteReturnView(LoginRequiredMixin, DeleteView):
 class ConfirmReturnView(LoginRequiredMixin, View):
     
     def post(self, request, item_id, product_id, user_id):
-        product = get_object_or_404(Product, id=product_id)
         ret = Return.objects.filter(id=item_id).first()
+        with transaction.atomic():
+            self.confirm_return_product(self, product_id, ret)
+            self.confirm_return_money(user_id, ret)
+            ret.delete()
+        return redirect('admin_return')
+    
+    def confirm_return_money(self, user_id, ret):
         user = StoreUser.objects.filter(id=user_id).first()
         user.wallet += ret.purchase.price_purchase
-        product.quantity_available +=ret.purchase.quantity
         user.save()
+        
+    def confirm_return_product(self, product_id, ret):
+        product = Product.objects.filter(id=product_id).first()
+        product.quantity_available +=ret.purchase.quantity
         product.save()
-        ret.delete()
-        return redirect('admin_return')
