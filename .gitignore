@@ -1,7 +1,6 @@
 __pycache__
 __init__.py
 migrations
-static
 static_final
 .vscode
 media

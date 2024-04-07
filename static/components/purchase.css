@@ -1,0 +1,136 @@
+.purchase_list {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    width: 70%;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px gray solid;
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.purchase_item {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 15px;
+    align-items: center;
+}
+
+.purchase_item__list {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    padding: 5px;
+}
+
+.purchase_item_image {
+    display: flex;
+    justify-content: flex-start;
+    width: 20%;
+}
+
+.purchase_product_image {
+    width: 100px;
+    height: 80px;
+    border-radius: 12px;
+}
+
+.purchase_content__list {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.purchase_item_content {
+    width: 80%;
+}
+
+.purchase_content_price {
+    display: flex;
+    justify-content: flex-end;
+}
+
+
+.purchase_buy_delete {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+.buy_button,
+.confirm_return_button {
+    border: medium none;
+	background-image: none; 
+	background: transparent;
+    background-color: rgb(0, 217, 120);
+    border: 1px whitesmoke solid;
+    color: whitesmoke;
+    padding: 5px;
+    width: 40px;
+    border-radius: 12px;
+}
+
+.confirm_return_button {
+    width: 60px;
+}
+
+.delete_button {
+    border: medium none;
+	background-image: none; 
+	background: transparent;
+    background-color: rgb(255, 39, 39);
+    border: 1px whitesmoke solid;
+    color: whitesmoke;
+    padding: 5px;
+    border-radius: 12px;
+    margin-right: 15px;
+}
+
+.noorders {
+    width: 350px;
+    height: 270px;
+    margin-bottom: 15px;
+}
+
+.purchase_history {
+    margin-top: 15px;
+    border: medium none;
+	background-image: none; 
+	background: transparent;
+    background-color: rgb(0, 217, 120);
+    border: 1px whitesmoke solid;
+    padding: 5px;
+    border-radius: 12px;
+    color: #ffffff;
+}
+
+
+.purchase_history_list {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.add_to_purchase_history {
+    display: flex;
+    align-items: center;
+}
+
+.purchase_history a {
+    color: whitesmoke;
+}
+
+.return_order {
+    border: medium none;
+	background-image: none; 
+	background: transparent;
+    background-color: rgb(0, 217, 120);
+    border: 1px whitesmoke solid;
+    padding: 5px;
+    border-radius: 12px;
+    color: #ffffff;
+}

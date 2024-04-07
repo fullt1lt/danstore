@@ -1,0 +1,27 @@
+.Footer {
+    position: relative;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: rgb(14, 22, 33);
+}
+
+.Footer_list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0 20px 0;
+    font-size: 15px;
+    border-bottom: 1px whitesmoke solid;
+}
+
+.Footer_list li {
+    margin-bottom: 10px;
+}
+
+.FooterEnd_List {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px 0 20px 0;
+    color: whitesmoke;
+}
