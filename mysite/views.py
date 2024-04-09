@@ -1,5 +1,7 @@
 from django.contrib import messages
 from django.db import transaction
+from django.forms import BaseModelForm
+from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import redirect, render
@@ -8,8 +10,8 @@ from django.views import View
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
-from django.views.generic import ListView, FormView, DeleteView, UpdateView, TemplateView
-from forms.forms import LoginUserForm, ProductForm, RegisterUserForm
+from django.views.generic import ListView, FormView, DeleteView, UpdateView, TemplateView,CreateView
+from forms.forms import LoginUserForm, ProductForm, PurchaseForm, RegisterUserForm
 from mysite.models import Product, Purchase, PurchaseHistory, Return, StoreUser
 from django.utils import timezone
 from datetime import timedelta
@@ -34,35 +36,23 @@ class Login(LoginView):
             return reverse_lazy('admin_page')
         else:
             return reverse_lazy('index')
-
-class Register(FormView):
+        
+class Register(CreateView):
     form_class = RegisterUserForm
     template_name = 'register.html'
     success_url = '/'
     
     def form_valid(self, form):
-        user = form.save(commit=False)
-        password1 = form.cleaned_data['password1']
-        password2 = form.cleaned_data['password2']
-        if password1 == password2:  
-            user.set_password(password1)
-            user.save()
-            user = authenticate(username=user.username, password=password1)
-            login(self.request, user)
-
-            return super().form_valid(form)
-        else:
-            form.add_error('password2', 'Пароли не совпадают')
-            return self.form_invalid(form)
-        
-    def form_invalid(self, form):
-        return self.render_to_response(self.get_context_data(form=form))
-
-
+        result = super().form_valid(form=form)
+        login(self.request, self.object)
+        return result
+    
+    
 class HomePage(ListView):
     paginate_by = 6
     template_name = 'index.html'
     queryset = Product.objects.all()
+    extra_context = {"form": PurchaseForm}
     
 class ProductPage(LoginRequiredMixin, ListView):
     
@@ -117,49 +107,36 @@ class ProductUpdateView(UpdateView):
         return reverse_lazy('admin_page')
 
 
-class AddToPurchaseView(LoginRequiredMixin,View):
+class AddToPurchaseView(LoginRequiredMixin, CreateView):
     login_url = reverse_lazy('login')
+    queryset = Product.objects.all()
+    form_class = PurchaseForm
+    success_url = '/'
     
-    def get(self, request, product_id):
-        user = request.user
-        quantity = self.preparation_quntity(request)
-        product = Product.objects.filter(id=product_id).first()
-        purchase = Purchase.objects.filter(user=user, product=product).first()
-        purchase_quantity = self.preparation_purchase_quntity(purchase)
-        error_message = self.add_to_purchase(user, quantity, product, purchase_quantity)
-        messages.error(request, error_message, extra_tags=str(product.id))
-        return redirect('index')
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
     
-    def preparation_purchase_quntity(self, purchase):
+    def form_valid(self, form):
+        purchase = form.save(commit=False)
+        purchase.user = self.request.user
+        purchase.product = form.product
+        purchase.save()
+        return super().form_valid(form=form)
+    
+    
+    def form_invalid(self, form) :
+        return redirect('/')
+
+    
+    def preparation_purchase_(self, purchase):
         if purchase is None:
             return 0
         else:
             return purchase.quantity
             
-            
-    def preparation_quntity(self,request):
-        quantity = request.GET.get('quantity', '1')
-        try:
-            return max(int(quantity), 1)
-        except ValueError:
-            return 1
-        
-    def add_to_purchase(self,user, quantity, product, purchase_quantity):
-        if product.quantity_available >= quantity and product.quantity_available >= quantity + purchase_quantity:
-            with transaction.atomic():
-                purchase_item, created = Purchase.objects.get_or_create(
-                    user=user,
-                    product=product,
-                    defaults={'quantity': quantity}
-                )
-                if not created:
-                    purchase_item.quantity += quantity
-                    purchase_item.save()
-                return None
-        else:
-            return 'There are not enough products in stock.'
-        
-    
+
 class RemoveFromPurchaseView(LoginRequiredMixin, View):
     def post(self, request, purchase_item_id):
         try:
@@ -259,7 +236,7 @@ class ConfirmReturnView(LoginRequiredMixin, View):
     def post(self, request, item_id, product_id, user_id):
         ret = Return.objects.filter(id=item_id).first()
         with transaction.atomic():
-            self.confirm_return_product(self, product_id, ret)
+            self.confirm_return_product(product_id, ret)
             self.confirm_return_money(user_id, ret)
             ret.delete()
         return redirect('admin_return')
