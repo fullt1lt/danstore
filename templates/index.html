@@ -21,7 +21,7 @@
                 <li class="item_price"> Price: {{item.price}} Kč</li>
                 <li class="item_quantity_available">
                     <span>In stock - {{item.quantity_available}} pcs</span>
-                    <form action="{% url 'add_to_purchase'%}" method="post" class="add_to_purchase">
+                    <form action="{% url 'add_to_cart'%}" method="post" class="add_to_purchase">
                         {% csrf_token %}
                         <input type="hidden" name="product_id" value="{{ item.pk }}">
                         <input type="number" name="quantity" value="1" min="1" class="quantity_product">

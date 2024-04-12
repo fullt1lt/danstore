@@ -54,17 +54,12 @@ class PurchaseForm(forms.ModelForm):
         except product.DoesNotExist:
             messages.error(request, "Product does not exist", extra_tags=str(product.id))
             raise forms.ValidationError("Product does not exist")
-        purchase = Purchase.objects.filter(user=request.user, product=product).first()
-        purchase_quantity = self.preparation_purchase_quantity(purchase)
         
-        if product.quantity_available <= quantity and product.quantity_available <= quantity + purchase_quantity:
+        if product.quantity_available <= quantity:
             messages.error(request, "Not enough quantity available", extra_tags=str(product.id))
             self.add_error(None, "Not enough quantity available")
+        if quantity * product.price > request.user.wallet:
+            messages.error(request, "Insufficient funds", extra_tags=str(product.id))
+            self.add_error(None, "Insufficient funds")
         self.product = product
         self.quantity = quantity
-            
-    def preparation_purchase_quantity(self, purchase):
-        if purchase is None:
-            return 0
-        else:
-            return purchase.quantity

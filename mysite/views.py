@@ -1,30 +1,21 @@
 from django.contrib import messages
 from django.db import transaction
-from django.forms import BaseModelForm
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import  login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
-from django.views.generic import ListView, FormView, DeleteView, UpdateView, TemplateView,CreateView
+from django.views.generic import ListView, DeleteView, UpdateView,CreateView
+from cart.cart import Cart
 from forms.forms import LoginUserForm, ProductForm, PurchaseForm, RegisterUserForm
 from mysite.models import Product, Purchase, PurchaseHistory, Return, StoreUser
 from django.utils import timezone
 from datetime import timedelta
 
-
-class HomePageView(LoginRequiredMixin, ListView):
-    template_name = "base.html"
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['purchase_items'] = Purchase.objects.filter(user=self.request.user)
-        return context
-    
 
 class Login(LoginView):
     form_class = LoginUserForm
@@ -53,6 +44,10 @@ class HomePage(ListView):
     template_name = 'index.html'
     queryset = Product.objects.all()
     extra_context = {"form": PurchaseForm}
+    
+    def get_queryset(self):
+        return Product.objects.order_by('-name')
+
     
 class ProductPage(LoginRequiredMixin, ListView):
     
@@ -120,22 +115,42 @@ class AddToPurchaseView(LoginRequiredMixin, CreateView):
     
     def form_valid(self, form):
         purchase = form.save(commit=False)
-        purchase.user = self.request.user
-        purchase.product = form.product
-        purchase.save()
+        cart = Cart(self.request)
+        user = self.request.user
+        product = form.product
+        purchase.user = user
+        purchase.product = product
+        product.quantity_available -= purchase.quantity
+        user.wallet -= purchase.quantity * product.price
+        with transaction.atomic():
+            user.save()
+            product.save()
+            purchase.save()
+            cart.remove(product)
         return super().form_valid(form=form)
     
     
     def form_invalid(self, form) :
         return redirect('/')
-
-    
-    def preparation_purchase_(self, purchase):
-        if purchase is None:
-            return 0
-        else:
-            return purchase.quantity
             
+class AddToCartView(View):
+    def post(self, request, *args, **kwargs):
+        product_id = request.POST.get('product_id')
+        quantity = int(request.POST.get('quantity', 1))
+        try:
+            product = Product.objects.get(pk=product_id)
+        except product.DoesNotExist:
+            messages.error(request, "Product does not exist", extra_tags=str(product.id))
+        self.check_quantity(request, product, quantity)
+        return redirect('/')
+
+    def check_quantity(self,request, product, quantity):
+        if product.quantity_available <= quantity :
+            messages.error(request, "Not enough quantity available", extra_tags=str(product.id))
+        else:
+            cart = Cart(request)
+            cart.add(product, quantity)
+            print(cart.cart)
 
 class RemoveFromPurchaseView(LoginRequiredMixin, View):
     def post(self, request, purchase_item_id):
@@ -148,13 +163,20 @@ class RemoveFromPurchaseView(LoginRequiredMixin, View):
         
         return redirect('purchase')
 
-class ViewPurchaseView(LoginRequiredMixin, ListView):    
+class ViewCartView(LoginRequiredMixin, ListView):    
     def get(self, request):
-        purchase_items = Purchase.objects.filter(user=request.user)
-        for purchase_item in purchase_items:
-            purchase_item.total_price = purchase_item.quantity * purchase_item.product.price
+        cart = Cart(request)
+        purchase_items = []
+        for key, value in cart.cart.items():
+            try:
+                product = Product.objects.get(id=key)
+                product.quantity_cart = value['quantity']
+                product.total_price = value['quantity'] * product.price
+                purchase_items.append(product)
+            except product.DoesNotExist:
+                pass
         return render(request, 'purchase.html', {'purchase_items': purchase_items})
-    
+
     
 class CheckoutView(LoginRequiredMixin, View):
     def post(self, request, product_id):

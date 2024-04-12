@@ -36,7 +36,7 @@
                                 <li>{{request.user.username}}</li>
                                 <li>{{request.user.wallet}}</li>
                             </ul>
-                            <a href="{% url 'purchase' %}"><img src="../static/basket_white.svg" alt="" class="basket"></a>
+                            <a href="{% url 'cart' %}"><img src="../static/basket_white.svg" alt="" class="basket">{{request.cart|length}}</a>
                             <form method="post" action="{% url 'logout' %}">
                             {% csrf_token %}
                             <button type="submit" class="button_logout">Logout</button>

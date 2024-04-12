@@ -48,6 +48,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'mysite.middleware.CartMiddleware',
 ]
 
 ROOT_URLCONF = 'danstore.urls'
@@ -136,3 +137,6 @@ LOGIN_REDIRECT_URL = '/'
 
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
+
+
+CART_SESSION_ID = 'cart'
