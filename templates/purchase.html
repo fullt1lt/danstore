@@ -7,17 +7,17 @@
 
 {% block content %}
 <ul class="purchase_list">
-    {% if purchase_items.count == 0 %}
+    {% if products.count == 0 %}
          <img src="../static/noorders.png" alt="noorders" class="noorders">
         <li>Shopping cart is empty</li>
     {% else %}
-        {% for purchase_item in purchase_items %}
+        {% for product in products %}
             <li class="purchase_item">
-                <h1>{{ purchase_item.name }}</h1>
+                <h1>{{ product.name }}</h1>
                 <ul class="purchase_item__list">
                     <li class="purchase_item_image">
-                        {% if purchase_item.image %}
-                            <img src="{{ purchase_item.image.url }}" alt="Product Image" class="purchase_product_image">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="Product Image" class="purchase_product_image">
                         {% else %}
                             No image available<br>
                         {% endif %}
@@ -25,14 +25,14 @@
                     <li class="purchase_item_content">
                         <ul class="purchase_content__list">
                             <li class="purchase_content_description">
-                                {{ purchase_item.description }}
+                                {{ product.description }}
                             </li>
                             <li class="purchase_content_price">
-                                <span>{{purchase_item.quantity_cart}} x {{ purchase_item.price }} = {{ purchase_item.total_price}}</span>
+                                <span>{{product.quantity_cart}} x {{ product.price }} = {{ product.total_price}}</span>
                             </li>
                             {% if messages %}
                                 {% for message in messages %}
-                                    {% if message.extra_tags == purchase_item.id|stringformat:"s" %}
+                                    {% if message.extra_tags == product.id|stringformat:"s" %}
                                         <li class="message">
                                             {{ message }}
                                         </li>
@@ -40,14 +40,14 @@
                                 {% endfor %}
                             {% endif %}
                             <li class="purchase_buy_delete">
-                                <form action="{% url 'remove_from_purchase' purchase_item.id %}" method="post">
+                                <form action="{% url 'remove_from_purchase' product.pk %}" method="post">
                                     {% csrf_token %}
                                     <button type="submit" class="delete_button">Delete</button>
                                 </form>
                                 <form action="{% url 'add_to_purchase'%}" method="post" class="add_to_purchase">
                                     {% csrf_token %}
-                                    <input type="hidden" name="product_id" value="{{ purchase_item.pk }}">
-                                    <input type="number" name="quantity" value="{{purchase_item.quantity_cart}}" min="1" class="quantity_product">
+                                    <input type="hidden" name="product_id" value="{{ product.pk }}">
+                                    <input type="number" name="quantity" value="{{product.quantity_cart}}" min="1" class="quantity_product">
                                     <button type="submit" class="buy_button">Buy</button>
                                 </form>
                             </li>

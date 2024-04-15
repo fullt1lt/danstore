@@ -44,10 +44,8 @@ class HomePage(ListView):
     template_name = 'index.html'
     queryset = Product.objects.all()
     extra_context = {"form": PurchaseForm}
+    ordering = ['-name']
     
-    def get_queryset(self):
-        return Product.objects.order_by('-name')
-
     
 class ProductPage(LoginRequiredMixin, ListView):
     
@@ -153,29 +151,29 @@ class AddToCartView(View):
             print(cart.cart)
 
 class RemoveFromPurchaseView(LoginRequiredMixin, View):
-    def post(self, request, purchase_item_id):
+    def post(self, request, product_id):
         try:
-            purchase_item = Purchase.objects.get(id=purchase_item_id)
-            purchase_item.delete()
-            messages.success(request, 'The product has been successfully removed from the cart.')
-        except Purchase.DoesNotExist:
-            messages.error(request, 'Product not found in cart.')
+            product = Product.objects.get(id=product_id)
+            cart = Cart(request)
+            cart.remove(product)
+        except Product.DoesNotExist:
+            messages.error(request, 'Product not found in cart.',  extra_tags=str(product.id))
         
-        return redirect('purchase')
+        return redirect('cart')
 
 class ViewCartView(LoginRequiredMixin, ListView):    
     def get(self, request):
         cart = Cart(request)
-        purchase_items = []
+        products = []
         for key, value in cart.cart.items():
             try:
                 product = Product.objects.get(id=key)
                 product.quantity_cart = value['quantity']
                 product.total_price = value['quantity'] * product.price
-                purchase_items.append(product)
+                products.append(product)
             except product.DoesNotExist:
                 pass
-        return render(request, 'purchase.html', {'purchase_items': purchase_items})
+        return render(request, 'purchase.html', {'products': products})
 
     
 class CheckoutView(LoginRequiredMixin, View):
@@ -204,7 +202,12 @@ class PurchaseHistoryView(LoginRequiredMixin, ListView):
     context_object_name = "purchase_history_items"
 
     def get_queryset(self):
-        return PurchaseHistory.objects.filter(user=self.request.user)
+        purchases_list = []
+        purchases = Purchase.objects.filter(user=self.request.user)
+        for purchase in purchases:
+            purchase.total_price = purchase.product.price * purchase.quantity
+            purchases_list.append(purchase)
+        return purchases_list
     
 
 class AddToPPurchaseHistoryView(View):
@@ -243,9 +246,7 @@ class AdminReturnView(ListView):
     model = Return
     template_name = "admin_return.html"
     context_object_name = "admin_return_items"
-
-    def get_queryset(self):
-        return Return.objects.all()
+    queryset = Return.objects.all()
 
     
 class DeleteReturnView(LoginRequiredMixin, DeleteView):
