@@ -1,8 +1,8 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
-from mysite.views import (AboutPage, AddToPurchaseView, AdminPageView, CreateProductView, CheckoutView, HomePage, Login, 
+from mysite.views import (AboutPage, AddToPurchaseView, AdminPageView, CreateProductView, HomePage, Login, 
                           ProductDeleteView, ProductPage, ProductUpdateView, Register, RemoveFromPurchaseView, ViewCartView,
-                          PurchaseHistoryView, AddToPPurchaseHistoryView, AdminReturnView, DeleteReturnView, ConfirmReturnView, AddToCartView)
+                          PurchaseHistoryView, AddToReturnView, AdminReturnView, DeleteReturnView, ConfirmReturnView, AddToCartView)
 
 urlpatterns = [
     path('', HomePage.as_view(), name='index'),
@@ -19,11 +19,9 @@ urlpatterns = [
     path('add-to-cart/', AddToCartView.as_view(), name='add_to_cart'),
     path('add_to_purchase/', AddToPurchaseView.as_view(), name='add_to_purchase'),
     path('remove_from_purchase/<int:product_id>/', RemoveFromPurchaseView.as_view(), name='remove_from_purchase'),
-    path('complete_purchase/<int:product_id>/', CheckoutView.as_view(), name='complete_purchase'),
     path('purchase_history/', PurchaseHistoryView.as_view(), name='purchase_history'),
     path('admin_return/', AdminReturnView.as_view(), name='admin_return'),
-    path('add_to_purchase_history/<int:history_item_id>/', AddToPPurchaseHistoryView.as_view(), name='add_to_purchase_history'),
+    path('add-to-return', AddToReturnView.as_view(), name='add_to_return'),
     path('delete_return/<int:pk>/', DeleteReturnView.as_view(), name='delete_return'),
-    path('confirm_return/<int:item_id>/<int:product_id>/<int:user_id>', ConfirmReturnView.as_view(), name='confirm_return'),
-
+    path('confirm_return/<int:pk>/>', ConfirmReturnView.as_view(), name='confirm_return'),
 ]

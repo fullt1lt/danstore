@@ -1,7 +1,9 @@
 from django.contrib import messages
 from django import forms
-from mysite.models import Product, StoreUser, Purchase
+from danstore.settings import PURCHASE_RETURN_TIME
+from mysite.models import Product, Return, StoreUser, Purchase
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.utils import timezone
       
 class RegisterUserForm(UserCreationForm):
     username = forms.CharField(label='', widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Name'}))
@@ -55,7 +57,7 @@ class PurchaseForm(forms.ModelForm):
             messages.error(request, "Product does not exist", extra_tags=str(product.id))
             raise forms.ValidationError("Product does not exist")
         
-        if product.quantity_available <= quantity:
+        if quantity > product.quantity_available:
             messages.error(request, "Not enough quantity available", extra_tags=str(product.id))
             self.add_error(None, "Not enough quantity available")
         if quantity * product.price > request.user.wallet:
@@ -63,3 +65,29 @@ class PurchaseForm(forms.ModelForm):
             self.add_error(None, "Insufficient funds")
         self.product = product
         self.quantity = quantity
+        
+        
+class ReturnForm(forms.ModelForm):
+    
+    class Meta:
+        model = Return
+        exclude = ['purchase',]
+        
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request')
+        super().__init__(*args, **kwargs)
+        
+    def clean(self):
+
+        request = self.request
+        purchase_id = self.data.get('purchase_id')
+        try:
+            purchase = Purchase.objects.get(pk=purchase_id)
+        except Purchase.DoesNotExist:
+            messages.error(request, "Purchase does not exist")
+            raise forms.ValidationError("Purchase does not exist")
+        if (timezone.now() - purchase.purchase_time).seconds > PURCHASE_RETURN_TIME:
+            messages.error(request, "Return time has expired", extra_tags=str(purchase.id))
+            self.add_error(None, "Return time has expired")
+        self.purchase = purchase
+        self.price_purchase = purchase.product.price

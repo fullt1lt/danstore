@@ -7,7 +7,7 @@
 
 {% block content %}
 <ul class="purchase_list">
-    {% if admin_return_items.count == 0 %}
+    {% if admin_return_items|length == 0 %}
          <img src="../static/empty_return_list.png" alt="noorders" class="noorders">
         <li>Return list is empty</li>
     {%else%}
@@ -29,14 +29,14 @@
                             {{ return_item.purchase.product.description }}
                         </li>
                         <li class="purchase_content_price">
-                            <span>{{return_item.purchase.quantity}} x {{ return_item.purchase.product.price }} = {{ return_item.purchase.price_purchase}}</span>
+                            <span>{{return_item.purchase.quantity}} x {{ return_item.purchase.product.price }} = {{ return_item.total_price}}</span>
                         </li>
                         <li class="purchase_history_list">
                             <form action="{% url 'delete_return' return_item.pk %}" method="post">
                                 {% csrf_token %}
                                 <button type="submit" class="delete_button">Delete</button>
                             </form>
-                            <form action="{% url 'confirm_return' return_item.id return_item.purchase.product.id return_item.purchase.user.id%}" method="post">
+                            <form action="{% url 'confirm_return' return_item.pk%}" method="post">
                                 {% csrf_token %}
                                 <button type="submit" class="confirm_return_button">Confirm</button>
                             </form>

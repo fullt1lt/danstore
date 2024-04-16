@@ -7,7 +7,7 @@
 
 {% block content %}
 <ul class="purchase_list">
-    {% if products.count == 0 %}
+    {% if products|length == 0%}
          <img src="../static/noorders.png" alt="noorders" class="noorders">
         <li>Shopping cart is empty</li>
     {% else %}

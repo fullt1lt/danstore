@@ -25,7 +25,11 @@
                         {% csrf_token %}
                         <input type="hidden" name="product_id" value="{{ item.pk }}">
                         <input type="number" name="quantity" value="1" min="1" class="quantity_product">
-                        <button type="submit" class="button_basket"><img src="../static/basket.svg" alt=""></button>
+                        {% if item.id|stringformat:"s" in request.cart.cart %}
+                            <button type="submit" class="button_basket"><img src="../static/full_basket.png" alt="" class="full_basket"></button>
+                        {% else %}
+                            <button type="submit" class="button_basket"><img src="../static/basket.svg" alt=""></button>
+                        {% endif %}
                     </form>
                 </li>
                 {% if messages %}

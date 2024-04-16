@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
+from danstore.settings import PURCHASE_RETURN_TIME
 
 
 class StoreUser(AbstractUser):
@@ -23,21 +25,17 @@ class Purchase(models.Model):
     purchase_time = models.DateTimeField(auto_now_add=True)
     
     def __str__(self) -> str:
-        return f"{self.user.username} - {self.product.name}" 
-        
-class PurchaseHistory(models.Model):
-    user = models.ForeignKey(StoreUser, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(blank=True, null=True)
-    price_purchase = models.PositiveIntegerField(blank=True, null=True)
-    purchase_history_time = models.DateTimeField(auto_now_add=True)
+        return f"{self.user.username} - {self.product.name}"
     
-    def __str__(self) -> str:
-        return f"{self.user.username} - {self.product.name} - {self.quantity}" 
+    @property
+    def not_returnable(self):
+        return (timezone.now() - self.purchase_time).seconds > PURCHASE_RETURN_TIME
+        
     
 class Return(models.Model):
-    purchase = models.ForeignKey(PurchaseHistory, on_delete=models.CASCADE)
-    request_time = models.DateTimeField(auto_now_add=True)
+    purchase = models.OneToOneField(Purchase, on_delete=models.CASCADE, related_name='ret')
+    price_purchase = models.PositiveIntegerField(blank=True, null=True)
     
     def __str__(self) -> str:
         return f"{self.purchase.user} - {self.purchase.product.name} - {self.purchase.quantity}"
+    

@@ -140,3 +140,5 @@ MEDIA_URL = '/media/'
 
 
 CART_SESSION_ID = 'cart'
+
+PURCHASE_RETURN_TIME = 180
