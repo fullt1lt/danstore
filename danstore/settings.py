@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mysite'
+    'mysite',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -142,3 +143,9 @@ MEDIA_URL = '/media/'
 CART_SESSION_ID = 'cart'
 
 PURCHASE_RETURN_TIME = 180
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    )
+}
