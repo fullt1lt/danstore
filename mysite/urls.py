@@ -1,26 +1,9 @@
-from django.conf.urls import include
-from django.urls import path
-from rest_framework import routers
-from mysite.api.resources import ProductModelViewSet, PurchaseModelViewSet, ReturnModelViewSet, UserModelViewSet
-
-
-router = routers.DefaultRouter()
-router.register('products', ProductModelViewSet)
-router.register('users', UserModelViewSet)
-router.register('purchases', PurchaseModelViewSet)
-router.register('returns', ReturnModelViewSet)
-
-# Wire up our API using automatic URL routing.
-# Additionally, we include login URLs for the browsable API.
-urlpatterns = [
-    path('api/', include(router.urls)),
-]
-
 from django.urls import path
 from django.contrib.auth.views import LogoutView
 from mysite.views import (AboutPage, AddToPurchaseView, AdminPageView, CreateProductView, HomePage, Login, 
                           ProductDeleteView, ProductPage, ProductUpdateView, Register, RemoveFromPurchaseView, ViewCartView,
                           PurchaseHistoryView, AddToReturnView, AdminReturnView, DeleteReturnView, ConfirmReturnView, AddToCartView)
+
 
 urlpatterns = [
     path('', HomePage.as_view(), name='index'),
