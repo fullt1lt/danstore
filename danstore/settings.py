@@ -85,6 +85,9 @@ DATABASES = {
         'PASSWORD': 'danpass',
         'HOST': 'localhost',
         'PORT': '5432',
+        'TEST': {
+            'NAME': 'testdb',
+        }
     }
 }
 
