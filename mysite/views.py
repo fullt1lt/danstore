@@ -1,5 +1,7 @@
 from django.contrib import messages
 from django.db import transaction
+from django.forms import ValidationError
+from django.http import Http404
 from django.utils.decorators import method_decorator
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import redirect, render
@@ -125,26 +127,38 @@ class AddToPurchaseView(LoginRequiredMixin, CreateView):
     
     
     def form_invalid(self, form) :
-        return redirect('/')
+        return redirect('cart')
         
     
 class AddToCartView(View):
     def post(self, request, *args, **kwargs):
-        product_id = request.POST.get('product_id')
-        quantity = int(request.POST.get('quantity', 1))
-        try:
-            product = Product.objects.get(pk=product_id)
-        except product.DoesNotExist:
-            messages.error(request, "Product does not exist", extra_tags=str(product.id))
-        self.check_quantity(request, product, quantity)
+        product = self.check_product_exist()
+        if product is not None:
+            self.check_quantity(product)
         return redirect('/')
 
-    def check_quantity(self,request, product, quantity):
-        if quantity > product.quantity_available:
-            messages.error(request, "Not enough quantity available", extra_tags=str(product.id))
+    def check_product_exist(self):
+        product_id = self.request.POST.get('product_id')
+        try:
+            return Product.objects.get(pk=product_id)
+        except Product.DoesNotExist:
+            messages.error(self.request, "Product does not exist", extra_tags=str(product_id))
+        
+    def check_quantity(self, product):
+        quantity = int(self.request.POST.get('quantity', 1))
+        cart = Cart(self.request)
+        if quantity > product.quantity_available or self.check_quantity_in_cart(quantity, product, cart):
+            messages.error(self.request, "Not enough quantity available", extra_tags=str(product.id))
         else:
-            cart = Cart(request)
             cart.add(product, quantity)
+
+    def check_quantity_in_cart(self, quantity, product, cart):
+        product_id = str(product.id)
+        if product_id in cart.cart:
+            cart_product = cart.cart[product_id]
+            if quantity + cart_product['quantity'] > product.quantity_available:
+                return True
+        return False
 
 
 class RemoveFromPurchaseView(LoginRequiredMixin, View):
@@ -154,8 +168,7 @@ class RemoveFromPurchaseView(LoginRequiredMixin, View):
             cart = Cart(request)
             cart.remove(product)
         except Product.DoesNotExist:
-            messages.error(request, 'Product not found in cart.',  extra_tags=str(product.id))
-        
+            messages.error(request, 'Product not found in cart.',  extra_tags=product_id)
         return redirect('cart')
 
 
@@ -237,7 +250,6 @@ class ConfirmReturnView(LoginRequiredMixin,SuperUserRequiredMixin, DeleteView):
     
     def form_valid(self, form):
         ret = self.object
-        print("aaaa")
         product = ret.purchase.product
         user = ret.purchase.user
         product.quantity_available += ret.purchase.quantity

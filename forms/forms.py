@@ -42,31 +42,41 @@ class PurchaseForm(forms.ModelForm):
         fields = ('quantity',)
         
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request')
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         
         
     def clean(self):
-        cleaner_data = super().clean()
-        quantity = cleaner_data.get('quantity')
-        request = self.request
-        product_id = self.data.get('product_id')
-        try:
-            product = Product.objects.get(pk=product_id)
-        except product.DoesNotExist:
-            messages.error(request, "Product does not exist", extra_tags=str(product.id))
-            raise forms.ValidationError("Product does not exist")
-        
-        if quantity > product.quantity_available:
-            messages.error(request, "Not enough quantity available", extra_tags=str(product.id))
-            self.add_error(None, "Not enough quantity available")
-        if quantity * product.price > request.user.wallet:
-            messages.error(request, "Insufficient funds", extra_tags=str(product.id))
-            self.add_error(None, "Insufficient funds")
+        cleaned_data = super().clean()
+        quantity = cleaned_data.get('quantity')
+        product = self.check_product_exist()
+        self.check_quantity(quantity, product)
+        self.check_wallet(quantity, product)
         self.product = product
         self.quantity = quantity
-        
-        
+        return cleaned_data
+           
+    def check_product_exist(self):
+        product_id = self.data.get('product_id')
+        try:
+            return Product.objects.get(pk=product_id)
+        except Product.DoesNotExist:
+            messages.error(self.request, "Product does not exist", extra_tags=str(product_id))
+            raise forms.ValidationError("Product does not exist")
+    
+    def check_quantity(self, quantity, product):
+        if quantity > product.quantity_available:
+            messages.error(self.request, "Not enough quantity available", extra_tags=str(product.id))
+            self.add_error(None, "Not enough quantity available")
+            raise forms.ValidationError("Not enough quantity available")
+    
+    def check_wallet(self, quantity, product):
+        if quantity * product.price > self.request.user.wallet:
+            messages.error(self.request, "Insufficient funds", extra_tags=str(product.id))
+            self.add_error(None, "Insufficient funds")
+            raise forms.ValidationError("Insufficient funds")
+            
+
 class ReturnForm(forms.ModelForm):
     
     class Meta:
