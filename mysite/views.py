@@ -38,7 +38,7 @@ class Register(CreateView):
         login(self.request, self.object)
         return result
     
-    
+     
 class HomePage(ListView):
     paginate_by = 6
     template_name = 'index.html'
@@ -85,7 +85,7 @@ class ProductDeleteView(LoginRequiredMixin,SuperUserRequiredMixin, DeleteView):
     success_url = '/admin_page/'
     
     
-class ProductUpdateView(UpdateView):
+class ProductUpdateView(SuperUserRequiredMixin,UpdateView):
     model = Product
     form_class = ProductForm
     template_name = 'product_update.html'

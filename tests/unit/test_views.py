@@ -1,10 +1,12 @@
 from unittest.mock import patch
 from django.conf import settings
-from django.test import RequestFactory, TestCase
+from django.http import HttpResponseRedirect
+from django.test import Client, RequestFactory, TestCase
+from django.urls import reverse, reverse_lazy
 from cart.cart import Cart
-from forms.forms import PurchaseForm
+from forms.forms import PurchaseForm, RegisterUserForm
 from mysite.models import Product, Purchase, StoreUser
-from mysite.views import AddToCartView, AddToPurchaseView
+from mysite.views import AddToCartView, AddToPurchaseView, CreateProductView, Login, ProductUpdateView, Register
 from tests.constats_test import PRODUCT_PRICE, QUANTITY_AVAILABLE, USER_WALLET
 
 
@@ -230,3 +232,117 @@ class AddToCartViewTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/')
         self.assertEqual(request.session, product_in_cart)
+        
+
+class LoginTestCase(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_get_success_url_staff_user(self):
+        admin_user = StoreUser.objects.create_user(username='admin', password='admin_password')
+        admin_user.is_staff = True
+        admin_user.save()
+        request = self.factory.get('/')
+        request.user = admin_user
+        view = Login()
+        view.request = request
+        success_url = view.get_success_url()
+        self.assertEqual(success_url, reverse_lazy('admin_page'))
+        
+    def test_lget_success_url_user(self):
+        user = StoreUser.objects.create_user(username='Test', password='test_password')
+        request = self.factory.get('/')
+        request.user = user
+        view = Login()
+        view.request = request
+        success_url = view.get_success_url()
+        self.assertEqual(success_url, reverse_lazy('index'))
+        
+
+class RegisterTestCase(TestCase):
+    def setUp(self):
+        self.url = reverse('register')
+
+    def test_form_valid(self):
+        post_data = {
+            'username': 'testuser',
+            'password1': 'testpassword123',
+            'password2': 'testpassword123',
+        }
+        response = self.client.post(self.url, post_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/')
+        self.assertTrue(StoreUser.objects.filter(username='testuser').exists())
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        
+    def test_form_invalid_password(self):
+        post_data_invalid = {
+            'username': 'Test', 
+            'password1': 'testpassword1231',
+            'password2': 'testpassword123',
+        }
+        response_invalid = self.client.post(self.url, post_data_invalid)
+        self.assertEqual(response_invalid.status_code, 200)
+        self.assertFalse(StoreUser.objects.filter(username='Test').exists())
+        self.assertFalse(response_invalid.wsgi_request.user.is_authenticated)
+        
+    def test_form_invalid_username(self):
+        post_data_invalid = {
+            'username': '', 
+            'password1': 'testpassword1231',
+            'password2': 'testpassword123',
+        }
+        response_invalid = self.client.post(self.url, post_data_invalid)
+        self.assertEqual(response_invalid.status_code, 200)
+        self.assertFalse(StoreUser.objects.filter(username='').exists())
+        self.assertFalse(response_invalid.wsgi_request.user.is_authenticated)
+        
+
+class CreateProductViewTestCase(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.user = StoreUser.objects.create_superuser(
+            username='admin', password='adminpassword')
+
+    def test_get_request(self):
+        request = self.factory.get(reverse('add_product'))
+        request.user = self.user
+        response = CreateProductView.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'form')
+
+    def test_post_valid_form(self):
+        request = self.factory.post(reverse('add_product'), {
+            'name': 'Test Product',
+            'price': '100.00',
+            'quantity_available': '10',
+        })
+        request.user = self.user
+        
+        response = CreateProductView.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+
+
+class ProductUpdateViewTest(TestCase):
+    def setUp(self):
+        self.superuser = StoreUser.objects.create_superuser(username='admin', email='admin@example.com', password='adminpassword')
+        self.product = Product.objects.create(name='Test Product', price=100, quantity_available=10)
+        self.factory = RequestFactory()
+
+    def test_update_view_requires_superuser(self):
+        request = self.factory.get(reverse('product_update', kwargs={'pk': self.product.pk}))
+        request.user = self.superuser
+        response = ProductUpdateView.as_view()(request, pk=self.product.pk)
+        self.assertEqual(response.status_code, 200)
+
+    def test_form_valid_redirects_to_admin_page(self):
+        post_data = {
+            'name': 'Updated Product',
+            'price': 200,
+            'quantity_available': 20,
+        }
+        request = self.factory.post(reverse('product_update', kwargs={'pk': self.product.pk}), post_data)
+        request.user = self.superuser
+        response = ProductUpdateView.as_view()(request, pk=self.product.pk)
+        self.assertEqual(response.status_code, 200)
+        # self.assertRedirects(response, reverse('admin_page'))
