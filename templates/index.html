@@ -12,9 +12,11 @@
             <ul class="product_item_list">
                 <li class="item_image">
                     {% if item.image %}
-                        <img src="{{item.image.url}}" alt="" class="product_image">
+                        <a href="{% url 'product' item.pk %}" class="product_link">
+                            <img src="{{item.image.url}}" alt="" class="product_image">
+                        </a>
                     {% else%}
-                        <img src="../static/logo.svg" alt="">
+                        <img src="../static/logo.svg" alt="" class="product_image">
                     {% endif %}
                 </li>
                 <li class="item_name">{{item.name}}</li>

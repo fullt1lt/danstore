@@ -164,3 +164,31 @@
     width: 25px;
     height: 25px;
 }
+
+.product_link{
+    width: 100%;
+}
+
+.product_list_link {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    align-items: start;
+    justify-content: center;
+    width: 100%;
+}
+
+.product_item_link {
+    border: 1px gray solid;
+    background-color: whitesmoke;
+    border-radius: 12px;
+    width: 50%;
+}
+
+.span_description_link{
+    display: block;
+    width: 100%;
+    word-wrap: break-word;
+    word-break: break-all;
+}

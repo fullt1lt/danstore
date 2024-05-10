@@ -6,5 +6,42 @@
 {% endblock %}
 
 {% block content %}
-Тут будет перечень товаров
+<ul class = "product_list_link">
+    <li class="product_item_link">
+        <ul class="product_item_list">
+            <li class="item_image">
+                {% if product.image %}
+                    <img src="{{product.image.url}}" alt="" class="product_image">
+                {% else%}
+                    <img src="../static/logo.svg" alt="" class="product_image">
+                {% endif %}
+            </li>
+            <li class="item_name">{{product.name}}</li>
+            <li class="item_price"> Price: {{product.price}} Kč</li>
+            <li class="item_quantity_available">
+                <span>In stock - {{product.quantity_available}} pcs</span>
+                <form action="{% url 'add_to_cart'%}" method="post" class="add_to_purchase">
+                    {% csrf_token %}
+                    <input type="hidden" name="product_id" value="{{ product.pk }}">
+                    <input type="number" name="quantity" value="1" min="1" class="quantity_product">
+                    {% if product.id|stringformat:"s" in request.cart.cart %}
+                        <button type="submit" class="button_basket"><img src="../static/full_basket.png" alt="" class="full_basket"></button>
+                    {% else %}
+                        <button type="submit" class="button_basket"><img src="../static/basket.svg" alt=""></button>
+                    {% endif %}
+                </form>
+            </li>
+            {% if messages %}
+                {% for message in messages %}
+                        {% if message.extra_tags == item.id|stringformat:"s" %}
+                            <li class="message">
+                                {{ message }}
+                            </li>
+                        {% endif %}
+                {% endfor %}
+            {% endif %}
+            <li class="item_description"><span class="span_description_link">{{product.description}}</span></li>
+        </ul>
+    </li>
+</ul>
 {% endblock %}

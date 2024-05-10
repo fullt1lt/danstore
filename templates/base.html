@@ -19,11 +19,9 @@
                         <li><a href="{% url 'admin_page' %}">Admin Page</a></li>
                         <li><a href="{% url 'admin_return' %}">Return</a></li>
                         <li><a href="{% url 'index' %}">Home</a></li>
-                        <li><a href="{% url 'product' %}">Product</a></li>
                         <li><a href="{% url 'about' %}">About Us</a></li>
                     {% else %}
                         <li><a href="{% url 'index' %}">Home</a></li>
-                        <li><a href="{% url 'product' %}">Product</a></li>
                         <li><a href="{% url 'about' %}">About Us</a></li>
                     {% endif %}
                 </ul>
@@ -75,11 +73,9 @@
                         <li><a href="{% url 'admin_page' %}">Admin Page</a></li>
                         <li><a href="{% url 'add_product' %}">Add Product</a></li>
                         <li><a href="{% url 'index' %}">Home</a></li>
-                        <li><a href="{% url 'product' %}">Product</a></li>
                         <li><a href="{% url 'about' %}">About Us</a></li>
                     {% else %}
                         <li><a href="{% url 'index' %}">Home</a></li>
-                        <li><a href="{% url 'product' %}">Product</a></li>
                         <li><a href="{% url 'about' %}">About Us</a></li>
                     {% endif %}
                 </ul>

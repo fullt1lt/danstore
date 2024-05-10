@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.utils.decorators import method_decorator
 from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views import View
 from django.contrib.auth import  login
@@ -43,14 +43,13 @@ class HomePage(ListView):
     queryset = Product.objects.all()
     extra_context = {"form": PurchaseForm}
     ordering = ['-name']
+
     
+class ProductPage(View):
     
-class ProductPage(LoginRequiredMixin, ListView):
-    
-    login_url = reverse_lazy('login') 
-    
-    def get(self, request, *args, **kwargs):
-        return render(request, 'product.html')
+    def get(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        return render(request, 'product.html', {'product' : product})
 
 
 class AboutPage(View):
@@ -123,13 +122,12 @@ class AddToPurchaseView(LoginRequiredMixin, CreateView):
             cart.remove(product)
         return super().form_valid(form=form)
     
-    
     def form_invalid(self, form) :
         return redirect('/')
         
     
 class AddToCartView(View):
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         product_id = request.POST.get('product_id')
         quantity = int(request.POST.get('quantity', 1))
         try:
@@ -205,7 +203,6 @@ class AddToReturnView(LoginRequiredMixin, CreateView):
         ret.save()
         return super().form_valid(form=form)
     
-    
     def form_invalid(self, form) :
         print(form.errors)
         return redirect('purchase_history')
@@ -237,7 +234,6 @@ class ConfirmReturnView(LoginRequiredMixin,SuperUserRequiredMixin, DeleteView):
     
     def form_valid(self, form):
         ret = self.object
-        print("aaaa")
         product = ret.purchase.product
         user = ret.purchase.user
         product.quantity_available += ret.purchase.quantity
@@ -245,4 +241,4 @@ class ConfirmReturnView(LoginRequiredMixin,SuperUserRequiredMixin, DeleteView):
         with transaction.atomic():
             product.save()
             user.save()
-            return super().form_valid(form=form)
+        return super().form_valid(form=form)

@@ -7,7 +7,7 @@ from mysite.views import (AboutPage, AddToPurchaseView, AdminPageView, CreatePro
 
 urlpatterns = [
     path('', HomePage.as_view(), name='index'),
-    path('product/', ProductPage.as_view(), name='product'),
+    path('product/<int:pk>/', ProductPage.as_view(), name='product'),
     path('login/', Login.as_view(), name='login'),
     path('about/', AboutPage.as_view(), name='about'),
     path('register/', Register.as_view(), name='register'),
