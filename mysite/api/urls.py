@@ -13,5 +13,5 @@ router.register('returns', ReturnModelViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('auth/', obtain_auth_token, name='auth_token'),
-    path('register/', RegisterApiView.as_view(), name='register'),
+    path('register/', RegisterApiView.as_view(), name='register_api'),
 ]
