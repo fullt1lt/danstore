@@ -1,8 +1,9 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    {%block style %}
+    {% block style %}
     {% endblock %}
     <title>Dansite</title>
 </head>
@@ -10,7 +11,7 @@
     <header>
         <ul class="Header_list">
             <li class="Header-logo">
-                <img src="../static_source/logo.svg" alt="" class="logo">
+                <img src="{% static 'logo.svg'%}" alt="" class="logo">
                 <span>DanStore</span>
             </li>
             <li>
@@ -65,7 +66,7 @@
     <footer class="Footer">
         <ul class="Footer_list">
             <li class="Header-logo">
-                <img src="../static_source/logo.svg" alt="" class="logo">
+                <img src="{% static 'logo.svg'%}" alt="" class="logo">
             </li>
             <li>
                 <ul class="Menu_list">
