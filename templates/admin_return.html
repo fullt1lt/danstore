@@ -8,7 +8,7 @@
 {% block content %}
 <ul class="purchase_list">
     {% if admin_return_items|length == 0 %}
-         <img src="../static/empty_return_list.png" alt="noorders" class="noorders">
+         <img src="../static_source/empty_return_list.png" alt="noorders" class="noorders">
         <li>Return list is empty</li>
     {%else%}
     {% for return_item in admin_return_items %}

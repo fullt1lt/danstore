@@ -17,7 +17,7 @@
                     {% if item.image %}
                         <img src="{{item.image.url}}" alt="" class="product_image">
                     {% else%}
-                        <img src="../static/logo.svg" alt="">
+                        <img src="{% static 'logo.svg'%}" alt="">
                     {% endif %}
                 </li>
                 <li class="item_name">{{item.name}}</li>

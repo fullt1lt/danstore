@@ -2,7 +2,7 @@
 {% load static %}
 
 {%block style %}
-    <link rel="stylesheet" href="{%static 'style.css'%}">
+    <link rel="stylesheet" href="{% static 'style.css'%}">
 {% endblock %}
 
 {% block content %}
@@ -13,7 +13,7 @@
                 {% if product.image %}
                     <img src="{{product.image.url}}" alt="" class="product_image">
                 {% else%}
-                    <img src="../static/logo.svg" alt="" class="product_image">
+                    <img src="{% static 'logo.svg'%}" alt="" class="product_image">
                 {% endif %}
             </li>
             <li class="item_name">{{product.name}}</li>
@@ -25,9 +25,9 @@
                     <input type="hidden" name="product_id" value="{{ product.pk }}">
                     <input type="number" name="quantity" value="1" min="1" class="quantity_product">
                     {% if product.id|stringformat:"s" in request.cart.cart %}
-                        <button type="submit" class="button_basket"><img src="../static/full_basket.png" alt="" class="full_basket"></button>
+                        <button type="submit" class="button_basket"><img src="../static_source/full_basket.png" alt="" class="full_basket"></button>
                     {% else %}
-                        <button type="submit" class="button_basket"><img src="../static/basket.svg" alt=""></button>
+                        <button type="submit" class="button_basket"><img src="../static_source/basket.svg" alt=""></button>
                     {% endif %}
                 </form>
             </li>

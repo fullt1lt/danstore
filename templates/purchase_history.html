@@ -8,7 +8,7 @@
 {% block content %}
 <ul class="purchase_list">
 {% if purchase_history_items|length == 0 %}
-         <img src="../static/noorders.png" alt="noorders" class="noorders">
+         <img src="../static_source/noorders.png" alt="noorders" class="noorders">
         <li>Purchase list is empty</li>
     {% else %}
         {% for history_item in purchase_history_items %}

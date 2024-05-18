@@ -1,8 +1,9 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    {%block style %}
+    {% block style %}
     {% endblock %}
     <title>Dansite</title>
 </head>
@@ -10,7 +11,7 @@
     <header>
         <ul class="Header_list">
             <li class="Header-logo">
-                <img src="../static/logo.svg" alt="" class="logo">
+                <img src="{% static 'logo.svg'%}" alt="" class="logo">
                 <span>DanStore</span>
             </li>
             <li>
@@ -35,7 +36,7 @@
                                 <li>{{request.user.wallet}}</li>
                             </ul>
                             <a href="{% url 'cart' %}" class="basket_list">
-                                <img src="../static/basket_header.svg" alt="" class="basket">
+                                <img src="../static_source/basket_header.svg" alt="" class="basket">
                                 {% if request.cart|length == 0 %}
                                 <span class="length_cart"></span>
                                 {% else %}
@@ -65,7 +66,7 @@
     <footer class="Footer">
         <ul class="Footer_list">
             <li class="Header-logo">
-                <img src="../static/logo.svg" alt="" class="logo">
+                <img src="{% static 'logo.svg'%}" alt="" class="logo">
             </li>
             <li>
                 <ul class="Menu_list">
