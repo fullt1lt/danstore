@@ -6,4 +6,5 @@ from django.test import TestCase
 class TestFake(TestCase):
 
     def test_fake(self):
+        print('aaaaaa')
         assert True
